@@ -14,7 +14,7 @@ public class Block {
 	private Color color;	//color of block if not subdivided
 	private Block[] children; // {UR, UL, LL, LR}
 
-	public static Random gen = new Random();
+	public static Random gen = new Random(2);
  
  
 	/*
@@ -40,37 +40,32 @@ public class Block {
 	 * (i.e. they will all be initialized by default)
 	 */
 	public Block(int lvl, int maxDepth) {
-		if (lvl > maxDepth) {
+		if (lvl < 0 || maxDepth < 0) {
 			throw new IllegalArgumentException("Cannot generate blocks at a level higher than the max depth.");
-		} else {
-			if (lvl == maxDepth) {			//first potential base case
-				int colourIndex = gen.nextInt();
+		}else if (lvl > maxDepth) {
+			throw new IllegalArgumentException("Cannot generate blocks at a level higher than the max depth");
+		}else {
+			this.level = lvl;
+			this.maxDepth = maxDepth;
+			if (lvl == maxDepth) {            //first potential base case
+				int colourIndex = gen.nextInt(GameColors.BLOCK_COLORS.length);
 				this.color = GameColors.BLOCK_COLORS[colourIndex];
-				this.level = lvl;
-				this.maxDepth = maxDepth;
 				this.children = new Block[0];
-			}
-			else {
-				float subDecider = gen.nextFloat();
-				if (subDecider >= Math.exp(-0.25 * this.level)) {			//second base case
-					int colourIndex = gen.nextInt();
+			} else {
+				double subDecider = gen.nextDouble();
+				if (subDecider >= Math.exp(-0.25 * this.level)) {            //second base case
+					int colourIndex = gen.nextInt(GameColors.BLOCK_COLORS.length);
 					this.color = GameColors.BLOCK_COLORS[colourIndex];
-					this.maxDepth = maxDepth;
-					this.level = lvl;
 					this.children = new Block[0];
-			}
-				else {														//recursion case
-					this.maxDepth = maxDepth;
-					this.level = lvl;
+				} else {                                                        //recursion case
 					this.children = new Block[4];
+					this.color = null;
 					for (int i = 0; i < this.children.length; i++) {
-						this.children[i] = new Block(lvl+1, maxDepth);
+						this.children[i] = new Block(lvl + 1, maxDepth);
 					}
 				}
+			}
 		}
-		/*
-		 * ADD YOUR CODE HERE
-		 */	 
 	}
 
 
