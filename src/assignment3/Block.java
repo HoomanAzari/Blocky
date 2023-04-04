@@ -40,7 +40,7 @@ public class Block {
 	 * (i.e. they will all be initialized by default)
 	 */
 	public Block(int lvl, int maxDepth) {
-		if (lvl < 0 || maxDepth < 0) {
+		if (lvl < 0 || maxDepth < 0) {								//TODO Ask TA why maxdepth 0 isnt allowed
 			throw new IllegalArgumentException("Cannot generate blocks at a level higher than the max depth.");
 		}else if (lvl > maxDepth) {
 			throw new IllegalArgumentException("Cannot generate blocks at a level higher than the max depth");
@@ -57,7 +57,7 @@ public class Block {
 					int colourIndex = gen.nextInt(GameColors.BLOCK_COLORS.length);
 					this.color = GameColors.BLOCK_COLORS[colourIndex];
 					this.children = new Block[0];
-				} else {                                                        //recursion case
+				} else {                                                     //recursion case
 					this.children = new Block[4];
 					this.color = null;
 					for (int i = 0; i < this.children.length; i++) {
@@ -77,13 +77,63 @@ public class Block {
 	  *  The size is the height and width of the block. (xCoord, yCoord) are the 
 	  *  coordinates of the top left corner of the block. 
 	 */
-	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {
-	  /*
-	   * ADD YOUR CODE HERE
-	   */
-	}
+	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {					//TODO edge case for negative children
+	  if (size <= 0 || size % 2 != 0) {												//size edge cases
+		  throw new IllegalArgumentException("Invalid input for size");
+	  }
+	  else if (xCoord < 0 || yCoord < 0) {										//coordinate edge cases
+		  throw new IllegalArgumentException("Invalid input for coordinates.");
+	  }
+	  else if (this.children.length == 0) {				//base case: if 0 children
+		  this.size = size;
+		  this.xCoord = xCoord;
+		  this.yCoord = yCoord;
+		  if (this.color == null) {
+			  throw new IllegalArgumentException("A block with no children must have a colour");
+		  }
+	  }
+	  else if (this.children.length != 0) {
+		  if (this.color != null) {
+			  throw new IllegalArgumentException("A block with children must not have a colour");
+		  }
+		  else if (this.children.length != 4) {
+			  throw new IllegalArgumentException("A block has either 0 or 4 children");
+		  }
+		  for (int i = 0; i < this.children.length; i++) {
+			  if (this.children[i].level != this.level + 1) {
+				  throw new IllegalArgumentException("Level of child block should be one higher than the parent block");
+			  }
+			  else if (this.children[i].maxDepth != this.maxDepth) {
+				  throw new IllegalArgumentException("Child and parent block must have the same max depth");
+			  }
+		  }
+	  }
+	  if (this.children.length == 4){									//recursion step: has 4 children
+		  this.size = size;
+		  this.xCoord = xCoord;
+		  this.yCoord = yCoord;
 
- 
+		  //UR coordinates
+		  this.children[0].xCoord = this.xCoord + this.size / 2;
+		  this.children[0].yCoord = this.yCoord;
+		  this.children[0].updateSizeAndPosition(this.size / 2, this.children[0].xCoord, this.children[0].yCoord);
+
+		  //UL coordinates
+		  this.children[1].xCoord = this.xCoord;
+		  this.children[1].yCoord = this.yCoord;
+		  this.children[1].updateSizeAndPosition(this.size / 2, this.children[1].xCoord, this.children[1].yCoord);
+
+		  //LL coordinates
+		  this.children[2].xCoord = this.xCoord;
+		  this.children[2].yCoord = this.yCoord + this.size / 2;
+		  this.children[2].updateSizeAndPosition(this.size / 2, this.children[2].xCoord, this.children[2].yCoord);
+
+		  //LR coordinates
+		  this.children[3].xCoord = this.xCoord + this.size / 2;
+		  this.children[3].yCoord = this.yCoord + this.size / 2;
+		  this.children[3].updateSizeAndPosition(this.size / 2, this.children[3].xCoord, this.children[2].yCoord);
+	  }
+	}
 	/*
   	* Returns a List of blocks to be drawn to get a graphical representation of this block.
   	* 
@@ -96,11 +146,25 @@ public class Block {
   	* The order in which the blocks to draw appear in the list does NOT matter.
   	*/
 	public ArrayList<BlockToDraw> getBlocksToDraw() {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
-		return null;
+		ArrayList<BlockToDraw> blockList = new ArrayList<>();
+		if (this.color != null) {
+			BlockToDraw myBlock = new BlockToDraw(this.color, this.xCoord, this.yCoord, this.size, 0);
+			BlockToDraw frameBlock = new BlockToDraw(GameColors.FRAME_COLOR, this.xCoord, this.yCoord, this.size, 3);
+			blockList.add(myBlock);
+			blockList.add(frameBlock);
+		} else {
+			ArrayList<BlockToDraw> childOne = this.children[0].getBlocksToDraw();
+			ArrayList<BlockToDraw> childTwo = this.children[1].getBlocksToDraw();
+			ArrayList<BlockToDraw> childThree = this.children[2].getBlocksToDraw();
+			ArrayList<BlockToDraw> childFour = this.children[3].getBlocksToDraw();
+			blockList.addAll(childOne);
+			blockList.addAll(childTwo);
+			blockList.addAll(childThree);
+			blockList.addAll(childFour);
+		}
+		return blockList;
 	}
+
 
 	/*
 	 * This method is provided and you should NOT modify it. 
