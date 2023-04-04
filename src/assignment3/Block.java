@@ -14,7 +14,7 @@ public class Block {
 	private Color color;	//color of block if not subdivided
 	private Block[] children; // {UR, UL, LL, LR}
 
-	public static Random gen = new Random(2);
+	public static Random gen = new Random(4);
  
  
 	/*
@@ -67,8 +67,6 @@ public class Block {
 			}
 		}
 	}
-
-
 	/*
 	  * Updates size and position for the block and all of its sub-blocks, while
 	  * ensuring consistency between the attributes and the relationship of the 
@@ -237,10 +235,33 @@ public class Block {
 	 * 
 	 */
 	public void reflect(int direction) {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
-	}
+		if (direction != 0 && direction != 1) {
+			throw new IllegalArgumentException("Input must be either 0 or 1");
+		}
+		if (this.children.length == 4) {
+			Block tempChildZero = this.children[0];
+			Block tempChildOne = this.children[1];
+			Block tempChildTwo = this.children[2];
+			Block tempChildThree = this.children[3];
+			if (direction == 0) {                    //x reflection
+				this.children[0] = tempChildThree;
+				this.children[1] = tempChildTwo;
+				this.children[2] = tempChildOne;
+				this.children[3] = tempChildZero;
+				for (Block child : this.children) {
+					child.reflect(direction);
+					}
+			}else if (direction == 1) {                //y reflection
+				this.children[0] = tempChildOne;
+				this.children[1] = tempChildZero;
+				this.children[2] = tempChildThree;
+				this.children[3] = tempChildTwo;
+				for (Block child : this.children) {
+					child.reflect(direction);
+					}
+				}
+			}
+		}
  
 
  
