@@ -172,6 +172,18 @@ public class Block {
 	public BlockToDraw getHighlightedFrame() {
 		return new BlockToDraw(GameColors.HIGHLIGHT_COLOR, this.xCoord, this.yCoord, this.size, 5);
 	}
+
+	public boolean coordinateValidity(Block myBlock, int x, int y) {				//Helper function that checks validity of input coordinates
+		int xLowerBound = myBlock.xCoord;
+		int xUpperBound = xLowerBound + (myBlock.size - 1);
+		int yLowerBound = myBlock.yCoord;
+		int yUpperBound = yLowerBound + (myBlock.size - 1);
+		if (x >= xLowerBound && x <= xUpperBound) {
+			if (y >= yLowerBound && y <= yUpperBound) {
+				return true;
+			}
+		}return false;
+	}
  
  
  
@@ -191,11 +203,29 @@ public class Block {
 	 * - this.level <= lvl <= maxDepth (if not throw exception)
 	 * - if (x,y) is not within this Block, return null.
 	 */
-	public Block getSelectedBlock(int x, int y, int lvl) {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
-		return null;
+	public Block getSelectedBlock(int x, int y, int lvl) {					//TODO edge case what if on the edge
+		if (lvl < this.level || lvl > this.maxDepth) {
+			throw new IllegalArgumentException("Invalid level input");
+		}
+		else if (!coordinateValidity(this, x, y)) {				//x,y not within block
+			return null;
+		}
+		if (this.children.length == 4) {
+			for (Block child : this.children) {
+				if (coordinateValidity(child, x, y)) {
+					if (child.level == lvl) {
+						return child;
+					}
+					else {
+						return child.getSelectedBlock(x, y, lvl);
+					}
+				}
+			}
+		}
+		else if (this.children.length == 0) {					//if it has no children
+			return this;
+		}
+		throw new IllegalArgumentException("A block has either 0 children or 4");
 	}
 
 	/*
