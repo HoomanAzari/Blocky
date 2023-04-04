@@ -239,31 +239,29 @@ public class Block {
 			throw new IllegalArgumentException("Input must be either 0 or 1");
 		}
 		if (this.children.length == 4) {
-			Block tempChildZero = this.children[0];
-			Block tempChildOne = this.children[1];
-			Block tempChildTwo = this.children[2];
-			Block tempChildThree = this.children[3];
+			Block tempZero = this.children[0];
+			Block tempOne = this.children[1];
+			Block tempTwo = this.children[2];
+			Block tempThree = this.children[3];
 			if (direction == 0) {                    //x reflection
-				this.children[0] = tempChildThree;
-				this.children[1] = tempChildTwo;
-				this.children[2] = tempChildOne;
-				this.children[3] = tempChildZero;
+				this.children[0] = new Block(tempThree.xCoord, tempThree.yCoord, tempThree.size, tempThree.level, tempThree.maxDepth, tempThree.color, tempThree.children);
+				this.children[1] = new Block(tempTwo.xCoord, tempTwo.yCoord, tempTwo.size, tempTwo.level, tempTwo.maxDepth, tempTwo.color, tempTwo.children);
+				this.children[2] = new Block(tempOne.xCoord, tempOne.yCoord, tempOne.size, tempOne.level, tempOne.maxDepth, tempOne.color, tempOne.children);
+				this.children[3] = new Block(tempZero.xCoord, tempZero.yCoord, tempZero.size, tempZero.level, tempZero.maxDepth, tempZero.color, tempZero.children);
 				for (Block child : this.children) {
-					child.reflect(direction);
+					child.reflect(0);
 					}
-			}else if (direction == 1) {                //y reflection
-				this.children[0] = tempChildOne;
-				this.children[1] = tempChildZero;
-				this.children[2] = tempChildThree;
-				this.children[3] = tempChildTwo;
+			}else {                //y reflection
+				this.children[0] = new Block(tempOne.xCoord, tempOne.yCoord, tempOne.size, tempOne.level, tempOne.maxDepth, tempOne.color, tempOne.children);
+				this.children[1] = new Block(tempZero.xCoord, tempZero.yCoord, tempZero.size, tempZero.level, tempZero.maxDepth, tempZero.color, tempZero.children);
+				this.children[2] = new Block(tempThree.xCoord, tempThree.yCoord, tempThree.size, tempThree.level, tempThree.maxDepth, tempThree.color, tempThree.children);
+				this.children[3] = new Block(tempTwo.xCoord, tempTwo.yCoord, tempTwo.size, tempTwo.level, tempTwo.maxDepth, tempTwo.color, tempTwo.children);
 				for (Block child : this.children) {
-					child.reflect(direction);
+					child.reflect(1);
 					}
 				}
 			}
 		}
- 
-
  
 	/*
 	 * Rotate this Block and all its descendants. 
@@ -271,9 +269,32 @@ public class Block {
 	 * counterclockwise. If this Block has no children, do nothing.
 	 */
 	public void rotate(int direction) {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
+		if (direction != 0 && direction != 1) {
+			throw new IllegalArgumentException("Input must be either 0 or 1");
+		}
+		if (this.children.length == 4) {
+			Block tempChildZero = this.children[0];
+			Block tempChildOne = this.children[1];
+			Block tempChildTwo = this.children[2];
+			Block tempChildThree = this.children[3];
+			if (direction == 1) {                    //Clock rotation
+				this.children[0] = tempChildOne;
+				this.children[1] = tempChildTwo;
+				this.children[2] = tempChildThree;
+				this.children[3] = tempChildZero;
+				for (Block child : this.children) {
+					child.rotate(1);
+				}
+			}else{									//Counter-Clock rotation
+				this.children[0] = tempChildThree;
+				this.children[1] = tempChildZero;
+				this.children[2] = tempChildOne;
+				this.children[3] = tempChildTwo;
+				for (Block child : this.children) {
+					child.rotate(0);
+				}
+			}
+		}
 	}
  
 
