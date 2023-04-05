@@ -76,7 +76,7 @@ public class Block {
 	  *  coordinates of the top left corner of the block. 
 	 */
 	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {					//TODO edge case for negative children			//TODO fix the edge cases
-	  if (size <= 0 || size % 2 != 0) {												//size edge cases
+	  if (size <= 0 || (size % 2 != 0 && this.level != this.maxDepth)) {												//size edge cases
 		  throw new IllegalArgumentException("Invalid input for size");
 	  }
 	  else if (xCoord < 0 || yCoord < 0) {										//coordinate edge cases
@@ -90,22 +90,22 @@ public class Block {
 			  throw new IllegalArgumentException("A block with no children must have a colour");
 		  }
 	  }
-//	  else if (this.children.length != 0) {
-//		  if (this.color != null) {
-//			  throw new IllegalArgumentException("A block with children must not have a colour");
-//		  }
-//		  else if (this.children.length != 4) {
-//			  throw new IllegalArgumentException("A block has either 0 or 4 children");
-//		  }
-//		  for (int i = 0; i < this.children.length; i++) {
-//			  if (this.children[i].level != this.level + 1) {
-//				  throw new IllegalArgumentException("Level of child block should be one higher than the parent block");
-//			  }
-//			  else if (this.children[i].maxDepth != this.maxDepth) {
-//				  throw new IllegalArgumentException("Child and parent block must have the same max depth");
-//			  }
-//		  }
-//	  }
+	  else if (this.children.length != 0) {
+		  if (this.color != null) {
+			  throw new IllegalArgumentException("A block with children must not have a colour");
+		  }
+		  else if (this.children.length != 4) {
+			  throw new IllegalArgumentException("A block has either 0 or 4 children");
+		  }
+		  for (int i = 0; i < this.children.length; i++) {
+			  if (this.children[i].level != this.level + 1) {
+				  throw new IllegalArgumentException("Level of child block should be one higher than the parent block");
+			  }
+			  else if (this.children[i].maxDepth != this.maxDepth) {
+				  throw new IllegalArgumentException("Child and parent block must have the same max depth");
+			  }
+		  }
+	  }
 	  if (this.children.length == 4){				    //recursion step: has 4 children
 		  this.size = size;
 		  this.xCoord = xCoord;
@@ -205,8 +205,17 @@ public class Block {
 		if (lvl < this.level || lvl > this.maxDepth) {
 			throw new IllegalArgumentException("Invalid level input");
 		}
+		else if (this.level < 0) {
+			throw new IllegalArgumentException("Level cannot be smaller than 0");
+		}
+		else if (x < 0 || y < 0) {
+			throw new IllegalArgumentException("The coordinates cannot be negative");
+		}
 		else if (!coordinateValidity(this, x, y)) {				//x,y not within block
 			return null;
+		}
+		else if (lvl == this.level && this.coordinateValidity(this, x,y)) {
+			return this;
 		}
 		if (this.children.length == 4) {
 			for (Block child : this.children) {
@@ -274,6 +283,7 @@ public class Block {
 				swapTwoBlocks(this.children[2], this.children[3]);
 				}
 			}
+		this.updateSizeAndPosition(this.size, this.xCoord, this.yCoord);
 		}
  
 	/*
@@ -290,7 +300,7 @@ public class Block {
 			Block tempChildOne = this.children[1];
 			Block tempChildTwo = this.children[2];
 			Block tempChildThree = this.children[3];
-			if (direction == 1) {                    //Clock rotation
+			if (direction == 1	) {                    //Clock rotation
 				this.children[0] = tempChildOne;
 				this.children[1] = tempChildTwo;
 				this.children[2] = tempChildThree;
@@ -307,6 +317,7 @@ public class Block {
 					child.rotate(0);
 				}
 			}
+			this.updateSizeAndPosition(this.size, this.xCoord, this.yCoord);
 		}
 	}
 
@@ -326,20 +337,19 @@ public class Block {
 	 * 
 	 */
 	public boolean smash() {
-		if (this.level == 0) {			//Block can't be smashed if it is top level
+		if (this.level == 0) {            //Block can't be smashed if it is top level
 			return false;
-		}
-		else if (this.level == this.maxDepth) {   	//Block can't be further smashed if already at max level
+		} else if (this.level == this.maxDepth) {    //Block can't be further smashed if already at max level
 			return false;
-		}
-		else {							//Block can be smashed
+		} else {                            //Block can be smashed
 			this.children = new Block[4];
-			this.children[0] = new Block(this.level+1, this.maxDepth);
-			this.children[1] = new Block(this.level+1, this.maxDepth);
-			this.children[2] = new Block(this.level+1, this.maxDepth);
-			this.children[3] = new Block(this.level+1, this.maxDepth);
- 		}this.updateSizeAndPosition(this.size, this.xCoord, this.yCoord);
-		return true;
+			this.color = null;
+			for (int i = 0; i < 4; i++) {
+				this.children[i] = new Block(this.level+1, this.maxDepth);
+			}
+			this.updateSizeAndPosition(this.size, this.xCoord, this.yCoord);
+			return true;
+		}
 	}
  
  
