@@ -75,14 +75,14 @@ public class Block {
 	  *  The size is the height and width of the block. (xCoord, yCoord) are the 
 	  *  coordinates of the top left corner of the block. 
 	 */
-	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {					//TODO edge case for negative children
+	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {					//TODO edge case for negative children			//TODO fix the edge cases
 	  if (size <= 0 || size % 2 != 0) {												//size edge cases
 		  throw new IllegalArgumentException("Invalid input for size");
 	  }
 	  else if (xCoord < 0 || yCoord < 0) {										//coordinate edge cases
 		  throw new IllegalArgumentException("Invalid input for coordinates.");
 	  }
-	  else if (this.children.length == 0) {				//base case: if 0 children
+	  if (this.children.length == 0) {				//base case: if 0 children
 		  this.size = size;
 		  this.xCoord = xCoord;
 		  this.yCoord = yCoord;
@@ -90,23 +90,23 @@ public class Block {
 			  throw new IllegalArgumentException("A block with no children must have a colour");
 		  }
 	  }
-	  else if (this.children.length != 0) {
-		  if (this.color != null) {
-			  throw new IllegalArgumentException("A block with children must not have a colour");
-		  }
-		  else if (this.children.length != 4) {
-			  throw new IllegalArgumentException("A block has either 0 or 4 children");
-		  }
-		  for (int i = 0; i < this.children.length; i++) {
-			  if (this.children[i].level != this.level + 1) {
-				  throw new IllegalArgumentException("Level of child block should be one higher than the parent block");
-			  }
-			  else if (this.children[i].maxDepth != this.maxDepth) {
-				  throw new IllegalArgumentException("Child and parent block must have the same max depth");
-			  }
-		  }
-	  }
-	  if (this.children.length == 4){									//recursion step: has 4 children
+//	  else if (this.children.length != 0) {
+//		  if (this.color != null) {
+//			  throw new IllegalArgumentException("A block with children must not have a colour");
+//		  }
+//		  else if (this.children.length != 4) {
+//			  throw new IllegalArgumentException("A block has either 0 or 4 children");
+//		  }
+//		  for (int i = 0; i < this.children.length; i++) {
+//			  if (this.children[i].level != this.level + 1) {
+//				  throw new IllegalArgumentException("Level of child block should be one higher than the parent block");
+//			  }
+//			  else if (this.children[i].maxDepth != this.maxDepth) {
+//				  throw new IllegalArgumentException("Child and parent block must have the same max depth");
+//			  }
+//		  }
+//	  }
+	  if (this.children.length == 4){				    //recursion step: has 4 children
 		  this.size = size;
 		  this.xCoord = xCoord;
 		  this.yCoord = yCoord;
@@ -234,31 +234,44 @@ public class Block {
 	 * over the x-axis or over the y-axis.
 	 * 
 	 */
+
+	public void swapTwoBlocks(Block blockOne, Block blockTwo) {
+		Block tempBlock = new Block();
+		tempBlock.size = blockOne.size;
+		tempBlock.level = blockOne.level;
+		tempBlock.maxDepth = blockOne.maxDepth;
+		tempBlock.color = blockOne.color;
+		tempBlock.children = blockOne.children;
+
+		blockOne.size = blockTwo.size;
+		blockOne.level = blockTwo.level;
+		blockOne.maxDepth = blockTwo.maxDepth;
+		blockOne.color = blockTwo.color;
+		blockOne.children = blockTwo.children;
+
+		blockTwo.size = tempBlock.size;
+		blockTwo.level = tempBlock.level;
+		blockTwo.maxDepth = tempBlock.maxDepth;
+		blockTwo.color = tempBlock.color;
+		blockTwo.children = tempBlock.children;
+	}
 	public void reflect(int direction) {
 		if (direction != 0 && direction != 1) {
 			throw new IllegalArgumentException("Input must be either 0 or 1");
 		}
 		if (this.children.length == 4) {
-			Block tempZero = this.children[0];
-			Block tempOne = this.children[1];
-			Block tempTwo = this.children[2];
-			Block tempThree = this.children[3];
 			if (direction == 0) {                    //x reflection
-				this.children[0] = new Block(tempThree.xCoord, tempThree.yCoord, tempThree.size, tempThree.level, tempThree.maxDepth, tempThree.color, tempThree.children);
-				this.children[1] = new Block(tempTwo.xCoord, tempTwo.yCoord, tempTwo.size, tempTwo.level, tempTwo.maxDepth, tempTwo.color, tempTwo.children);
-				this.children[2] = new Block(tempOne.xCoord, tempOne.yCoord, tempOne.size, tempOne.level, tempOne.maxDepth, tempOne.color, tempOne.children);
-				this.children[3] = new Block(tempZero.xCoord, tempZero.yCoord, tempZero.size, tempZero.level, tempZero.maxDepth, tempZero.color, tempZero.children);
-				for (Block child : this.children) {
+				for (Block child: this.children) {
 					child.reflect(0);
-					}
+				}
+				swapTwoBlocks(this.children[0], this.children[3]);
+				swapTwoBlocks(this.children[1], this.children[2]);
 			}else {                //y reflection
-				this.children[0] = new Block(tempOne.xCoord, tempOne.yCoord, tempOne.size, tempOne.level, tempOne.maxDepth, tempOne.color, tempOne.children);
-				this.children[1] = new Block(tempZero.xCoord, tempZero.yCoord, tempZero.size, tempZero.level, tempZero.maxDepth, tempZero.color, tempZero.children);
-				this.children[2] = new Block(tempThree.xCoord, tempThree.yCoord, tempThree.size, tempThree.level, tempThree.maxDepth, tempThree.color, tempThree.children);
-				this.children[3] = new Block(tempTwo.xCoord, tempTwo.yCoord, tempTwo.size, tempTwo.level, tempTwo.maxDepth, tempTwo.color, tempTwo.children);
 				for (Block child : this.children) {
 					child.reflect(1);
-					}
+				}
+				swapTwoBlocks(this.children[0], this.children[1]);
+				swapTwoBlocks(this.children[2], this.children[3]);
 				}
 			}
 		}
@@ -296,7 +309,6 @@ public class Block {
 			}
 		}
 	}
- 
 
 
 	/*
@@ -314,10 +326,20 @@ public class Block {
 	 * 
 	 */
 	public boolean smash() {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
-		return false;
+		if (this.level == 0) {			//Block can't be smashed if it is top level
+			return false;
+		}
+		else if (this.level == this.maxDepth) {   	//Block can't be further smashed if already at max level
+			return false;
+		}
+		else {							//Block can be smashed
+			this.children = new Block[4];
+			this.children[0] = new Block(this.level+1, this.maxDepth);
+			this.children[1] = new Block(this.level+1, this.maxDepth);
+			this.children[2] = new Block(this.level+1, this.maxDepth);
+			this.children[3] = new Block(this.level+1, this.maxDepth);
+ 		}this.updateSizeAndPosition(this.size, this.xCoord, this.yCoord);
+		return true;
 	}
  
  
