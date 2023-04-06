@@ -14,7 +14,7 @@ public class Block {
 	private Color color;	//color of block if not subdivided
 	private Block[] children; // {UR, UL, LL, LR}
 
-	public static Random gen = new Random(4);
+	public static Random gen = new Random(123);
  
  
 	/*
@@ -76,10 +76,10 @@ public class Block {
 	  *  coordinates of the top left corner of the block. 
 	 */
 	public void updateSizeAndPosition (int size, int xCoord, int yCoord) {					//TODO edge case for negative children			//TODO fix the edge cases
-	  if (size <= 0 || (size % 2 != 0 && this.level != this.maxDepth)) {												//size edge cases
+		if (size <= 0 || (size % 2 != 0 && this.level != this.maxDepth)) {
 		  throw new IllegalArgumentException("Invalid input for size");
 	  }
-	  else if (xCoord < 0 || yCoord < 0) {										//coordinate edge cases
+		else if (xCoord < 0 || yCoord < 0) {										//coordinate edge cases
 		  throw new IllegalArgumentException("Invalid input for coordinates.");
 	  }
 	  if (this.children.length == 0) {				//base case: if 0 children
@@ -170,7 +170,6 @@ public class Block {
 	public BlockToDraw getHighlightedFrame() {
 		return new BlockToDraw(GameColors.HIGHLIGHT_COLOR, this.xCoord, this.yCoord, this.size, 5);
 	}
-
 	public boolean coordinateValidity(Block myBlock, int x, int y) {				//Helper function that checks validity of input coordinates
 		int xLowerBound = myBlock.xCoord;
 		int xUpperBound = xLowerBound + (myBlock.size - 1);
@@ -263,6 +262,11 @@ public class Block {
 		blockTwo.maxDepth = tempBlock.maxDepth;
 		blockTwo.color = tempBlock.color;
 		blockTwo.children = tempBlock.children;
+
+//		Block tempBlockOne = blockOne;
+//		Block tempBlockTwo = blockTwo;
+//		blockOne = new Block(tempBlockOne.xCoord, tempBlockOne.yCoord, tempBlockTwo.size, tempBlockTwo.level, tempBlockTwo.maxDepth, tempBlockTwo.color, tempBlockTwo.children);
+//		blockTwo = new Block(tempBlockTwo.xCoord, tempBlockTwo.yCoord, tempBlockOne.size, tempBlockOne.level, tempBlockOne.maxDepth, tempBlockOne.color, tempBlockOne.children);
 	}
 	public void reflect(int direction) {
 		if (direction != 0 && direction != 1) {
@@ -300,7 +304,7 @@ public class Block {
 			Block tempChildOne = this.children[1];
 			Block tempChildTwo = this.children[2];
 			Block tempChildThree = this.children[3];
-			if (direction == 1	) {                    //Clock rotation
+			if (direction == 1) {                    //Clock rotation
 				this.children[0] = tempChildOne;
 				this.children[1] = tempChildTwo;
 				this.children[2] = tempChildThree;
@@ -351,8 +355,6 @@ public class Block {
 			return true;
 		}
 	}
- 
- 
 	/*
 	 * Return a two-dimensional array representing this Block as rows and columns of unit cells.
 	 * 
@@ -362,14 +364,41 @@ public class Block {
 	 * arr[0][0] is the color of the unit cell in the upper left corner of this Block.
 	 */
 	public Color[][] flatten() {
-		/*
-		 * ADD YOUR CODE HERE
-		 */
-		return null;
+		int arraySize = (int) Math.pow(2, this.maxDepth - this.level);
+		Color[][] colour = new Color[arraySize][arraySize];
+		if (this.children.length == 0) {
+			for (int i = 0; i < arraySize; i++) {
+				for (int j = 0; j < arraySize; j++) {
+					colour[i][j] = this.color;
+				}
+			}
+		}else {
+			Color[][] TopRight = children[0].flatten();
+			Color[][] TopLeft = children[1].flatten();
+			Color[][] BottomLeft = children[2].flatten();
+			Color[][] BottomRight = children[3].flatten();
+
+			for (int i = 0; i < arraySize / 2; i++) {
+				for (int j = arraySize / 2; j < arraySize; j++) {
+					colour[i][j] = TopRight[i][j - arraySize / 2];
+				}
+				for (int j = 0; j < arraySize / 2; j++) {
+					colour[i][j] = TopLeft[i][j];
+				}
+			}
+			for (int i = arraySize / 2; i < arraySize; i++) {
+				for (int j = 0; j < arraySize / 2; j++) {
+					colour[i][j] = BottomLeft[i - arraySize / 2][j];
+				}
+				for (int j = arraySize / 2; j < arraySize; j++) {
+					colour[i][j] = BottomRight[i - arraySize / 2][j - arraySize / 2];
+				}
+			}
+		}
+		return colour;
 	}
 
- 
- 
+
 	// These two get methods have been provided. Do NOT modify them. 
 	public int getMaxDepth() {
 		return this.maxDepth;
@@ -433,3 +462,23 @@ public class Block {
 		}
 	}
 }
+
+
+//Block tempBlock = new Block();
+//		tempBlock.size = blockOne.size;
+//		tempBlock.level = blockOne.level;
+//		tempBlock.maxDepth = blockOne.maxDepth;
+//		tempBlock.color = blockOne.color;
+//		tempBlock.children = blockOne.children;
+//
+//		blockOne.size = blockTwo.size;
+//		blockOne.level = blockTwo.level;
+//		blockOne.maxDepth = blockTwo.maxDepth;
+//		blockOne.color = blockTwo.color;
+//		blockOne.children = blockTwo.children;
+//
+//		blockTwo.size = tempBlock.size;
+//		blockTwo.level = tempBlock.level;
+//		blockTwo.maxDepth = tempBlock.maxDepth;
+//		blockTwo.color = tempBlock.color;
+//		blockTwo.children = tempBlock.children;
